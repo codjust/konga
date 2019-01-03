@@ -315,6 +315,15 @@
             access: AccessLevels.anon
           },
           {
+            state: 'selectors',
+            icon: 'mdi-shuffle-variant',
+            show: function () {
+              return AuthService.hasPermission('services', 'read') && UserService.user().node && $rootScope.isGatewayVersionEqOrGreater('0.10.0');
+            },
+            title: 'Selectors',
+            access: AccessLevels.anon
+          },
+          {
             state: 'certificates',
             icon: 'mdi-certificate',
             show: function () {
