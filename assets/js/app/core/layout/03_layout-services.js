@@ -41,6 +41,15 @@
             access: AccessLevels.user
           },
           {
+            state: 'selectors',
+            show : function() {
+              return AuthService.isAuthenticated() && $rootScope.Gateway
+            },
+            title: 'Selectors',
+            icon : 'mdi-cloud-outline',
+            access: AccessLevels.user
+          },
+          {
             state: 'apis',
             show : function() {
               return AuthService.isAuthenticated() && $rootScope.Gateway

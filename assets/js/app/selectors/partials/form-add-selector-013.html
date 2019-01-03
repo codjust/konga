@@ -1,0 +1,25 @@
+<div class="form-group" ng-class="{'has-error' : errors.selector_name}">
+    <label class="col-sm-4 control-label">Selector Name <br><!-- <em><small class="help-block">optional</small></em> --></label>
+    <div class="col-sm-7">
+        <input ng-model="selector.selector_name" class="form-control">
+        <div class="text-danger" ng-if="errors.selector_name" data-ng-bind="errors.selector_name"></div>
+        <p class="help-block">The selector name.</p>
+    </div>
+</div>
+<!--/ END EXTRAS -->
+<div class="form-group" ng-class="{'has-error' : errors.service_id}">
+    <label class="col-sm-4 control-label">Service ID<br><!-- <em><small class="help-block">optional</small></em> --></label>
+    <div class="col-sm-7">
+        <input ng-model="selector.service_id" class="form-control">
+        <div class="text-danger" ng-if="errors.service_id" data-ng-bind="errors.service_id"></div>
+        <p class="help-block">The selector bind service id.</p>
+    </div>
+    <label class="col-sm-4 control-label">Service Name<br><!-- <em><small class="help-block">optional</small></em> --></label>
+    <div class="col-sm-7">
+        <input ng-model="selector.service_name" class="form-control">
+        <div class="text-danger" ng-if="errors.service_name" data-ng-bind="errors.service_name"></div>
+        <p class="help-block">The selector bind service name.</p>
+    </div>
+</div>
+
+

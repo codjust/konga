@@ -26,7 +26,8 @@
     'frontend.cluster',
     'frontend.healthchecks',
     'frontend.services',
-    'frontend.routes'
+    'frontend.routes',
+    'frontend.selectors'
 
   ]);
 

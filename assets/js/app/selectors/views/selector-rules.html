@@ -1,0 +1,69 @@
+<div class="col-md-12 bg-light-grey padding margin-bottom">
+    <div class="col-md-6 text-left">
+        <h4>
+            Rules
+
+        </h4>
+    </div>
+    <div class="col-md-6 text-right" >
+        <button class="btn btn-primary btn-flat" style="margin-top: 5px" ng-click="onAddRule()">
+            <i class="mdi mdi-plus"></i>
+            add rule
+        </button>
+    </div>
+</div>
+
+<div class="col-md-12 bg-light-grey padding">
+    <div class="input-group col-sm-4 pull-left">
+        <div class="input-group-addon">
+            <i class="mdi mdi-magnify"></i>
+        </div>
+        <input type="text" data-ng-model="search" class="form-control" placeholder="search rules...">
+    </div>
+    <dir-pagination-controls class="pull-right"></dir-pagination-controls>
+</div>
+<table class="table">
+    <tr>
+        <th width="1"></th>
+        <th>Rule Name</th>
+        <th>Conditon Type</th>
+        <th>Upstream Name</th>
+        <th width="1" ng-if="canEdit"></th>
+        <th width="1" ng-if="canDelete"></th>
+    </tr>
+    <tr
+            dir-paginate="item in rules | itemsPerPage: 25">
+        <!--<td>-->
+            <!--&lt;!&ndash;<img ng-src="images/kong/plugins/{{item.name}}.png" style="height: 42px">&ndash;&gt;-->
+        <!--</td>-->
+        <td>
+            <raw-view data-item="item"></raw-view>
+        </td>
+        <td>
+            {{item.rule_name || "-"}}
+        </td>
+        <td>
+            {{item.type || "-"}}
+        </td>
+        <td>
+            {{item.upstream_name || "-"}}
+        </td>
+       <!--  <td ng-if="canEdit">
+            <a class="clickable btn btn-link btn-warning" data-ui-sref="routes.read({route_id:item.id})">
+                <i class="mdi mdi-pencil"></i>
+                edit
+            </a>
+        </td> -->
+        <td ng-if="canDelete">
+            <button class="btn btn-link btn-danger" ng-click="deleteRule(item)">
+                <i class="mdi mdi-delete"></i>
+                delete
+            </button>
+        </td>
+    </tr>
+    <tr data-ng-if="rules.length === 0">
+        <td colspan="100%" class="text-center text-muted">
+            <em>no data found...</em>
+        </td>
+    </tr>
+</table>

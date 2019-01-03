@@ -49,6 +49,34 @@
               sortable: true,
             }
           ],
+          selector: [
+            {
+              title: 'selector name',
+              column: 'selector_name',
+              searchable: true,
+              sortable: true,
+              inSearch: true,
+              inTitle: true
+            },
+            {
+              title: 'service name',
+              column: 'service_name',
+              searchable: true,
+              sortable: true,
+              inSearch: true,
+              inTitle: true
+            },
+            {
+              title: 'created',
+              column: 'created_at',
+              sortable: true,
+            },
+            {
+              title: 'update time',
+              column: 'op_time',
+              sortable: true,
+            }
+          ],
           route: [
             {
               title: 'id',

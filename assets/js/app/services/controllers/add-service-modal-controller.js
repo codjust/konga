@@ -27,7 +27,7 @@
 
 
         $scope.submit = function () {
-
+1
           clearService()
 
 
