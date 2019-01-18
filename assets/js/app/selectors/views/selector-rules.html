@@ -25,6 +25,7 @@
 <table class="table">
     <tr>
         <th width="1"></th>
+        <th width="1"></th>
         <th>Rule Name</th>
         <th>Conditon Type</th>
         <th>Upstream Name</th>
@@ -38,6 +39,16 @@
         <!--</td>-->
         <td>
             <raw-view data-item="item"></raw-view>
+        </td>
+        <td>
+            <i class="mdi mdi-toggle-switch text-success"
+            ng-show="item.enable"
+            ng-click="toggleRule(item)"
+            uib-tooltip="Enabled"></i>
+         <i class="mdi mdi-toggle-switch-off text-muted"
+            ng-show="!item.enable"
+            ng-click="toggleRule(item)"
+            uib-tooltip="Disabled"></i>
         </td>
         <td>
             {{item.rule_name || "-"}}

@@ -9,9 +9,9 @@
   angular.module('frontend.selectors')
     .controller('SelectorRulesController', [
       '_', '$scope', '$stateParams', '$log', '$state', 'SelectorService',
-      '$uibModal', 'DialogService', 'InfoService' ,'AuthService', 'MessageService',
+      '$uibModal', 'DialogService', 'InfoService', 'AuthService', 'MessageService',
       function controller(_, $scope, $stateParams, $log, $state, SelectorService,
-                          $uibModal, DialogService, InfoService, AuthService, MessageService) {
+        $uibModal, DialogService, InfoService, AuthService, MessageService) {
 
 
 
@@ -23,15 +23,16 @@
         console.log("SelectorRulesController selector_id:", $scope.selector_id)
         $scope.onAddRule = onAddRule;
         $scope.deleteRule = deleteRule;
-  /*      $scope.onEditRoute = onEditRoute;
-        $scope.deleteRoute = deleteRoute;
-        $scope.updateRoute = updateRoute;
-        $scope.toggleAttribute = toggleAttribute;
-         */
-        $scope.canCreate = AuthService.hasPermission('services','create');
-        $scope.canEdit = AuthService.hasPermission('services','edit');
-        $scope.canDelete = AuthService.hasPermission('services','delete');
-        $scope.search = '' 
+        $scope.toggleRule = toggleRule;
+        /*      $scope.onEditRoute = onEditRoute;
+              $scope.deleteRoute = deleteRoute;
+              $scope.updateRoute = updateRoute;
+              $scope.toggleAttribute = toggleAttribute;
+               */
+        $scope.canCreate = AuthService.hasPermission('services', 'create');
+        $scope.canEdit = AuthService.hasPermission('services', 'edit');
+        $scope.canDelete = AuthService.hasPermission('services', 'delete');
+        $scope.search = ''
 
         //$log.debug("Routes",$scope.routes.data);
 
@@ -42,10 +43,10 @@
          */
 
 
-        function toggleAttribute(route,attr, enabled) {
+        function toggleAttribute(route, attr, enabled) {
           var obj = {};
           obj[attr] = !enabled;
-          updateRoute(route,obj);
+          updateRoute(route, obj);
         }
 
         function onAddRule() {
@@ -70,59 +71,7 @@
               fetchRules();
             }
           });
-        } 
-
- /*        function updateRoute(route,data) {
-
-          RoutesService.update(route.id, data)
-            .then(function (res) {
-              $log.debug("updateRoute", res)
-              $scope.routes.data[$scope.routes.data.indexOf(route)] = res.data;
-
-            }).catch(function (err) {
-            $log.error("updateRoute", err)
-          })
-        } */
-
-
-      /*   function deleteRoute(route) {
-          DialogService.prompt(
-            "Delete Route", "Really want to delete the route?",
-            ['No don\'t', 'Yes! delete it'],
-            function accept() {
-              RoutesService.delete(route)
-                .then(function (resp) {
-                  $scope.routes.data.splice($scope.routes.data.indexOf(route), 1);
-                }).catch(function (err) {
-                $log.error(err)
-              })
-            }, function decline() {
-            })
         }
-
-        function onEditRoute(item) {
-          var modalInstance = $uibModal.open({
-            animation: true,
-            ariaLabelledBy: 'modal-title',
-            ariaDescribedBy: 'modal-body',
-            templateUrl: 'js/app/routes/views/route-modal.html',
-            size: 'lg',
-            controller: 'RouteDetailsController',
-            resolve: {
-              _route: function () {
-                return _.cloneDeep(item)
-              }
-            }
-          });
-
-          modalInstance.result.then(function (data) {
-
-          }, function (data) {
-            if(data) {
-              fetchRules();
-            }
-          });
-        } */
 
         function fetchRules() {
           SelectorService.findByIdOrName($scope.selector_id).then(function (res) {
@@ -135,51 +84,88 @@
           });
         }
 
+        function toggleRule(item) {
+          var currentSelector = $scope.selector
+          var value = currentSelector.value
+          var rulesJsonObject = angular.fromJson(value)
+          var currentRules = rulesJsonObject.rules
+          console.log("toggleRule item start:", item)
+          var index = 0;
+          var findFlag = false;
+          for (var r in currentRules) {
+            console.log("r rule:", r)
+            if (currentRules[r].rule_name == item.rule_name && currentRules[r].type == item.type
+              && currentRules[r].upstream_name == item.upstream_name) {
+              console.log("toggleRule rule item:", item)
+              currentRules[r].enable = !currentRules[r].enable;
+              index = r;
+              findFlag = true;
+              break;
+            }
+          }
+
+          if(!findFlag) {
+            MessageService.error("Do not find rule toggle enable!");
+            return;
+          } 
+
+          $scope.rules[index].enable = !$scope.rules[index].enable;
+
+          console.log("currentRules:", currentRules)
+          if (!currentRules && currentRules !== 0 && currentRules !== '') {
+            rulesJsonObject.rules = [];
+          } else {
+            rulesJsonObject.rules = currentRules;
+          }
+          console.log("rulesJsonObject:", rulesJsonObject)
+          var newValue = angular.toJson(rulesJsonObject)
+          $scope.selector.value = newValue
+
+          SelectorService.update($scope.selector).then(function (res) {
+            console.log("delete rule:", res)
+            fetchRules();
+          })
+        }
+
+
         function deleteRule(item) {
           DialogService.prompt(
             "Delete Rule", "Really want to delete the rule?",
             ['No don\'t', 'Yes! delete it'],
             function accept() {
-              var currentSelector =  $scope.selector 
+              var currentSelector = $scope.selector
               var value = currentSelector.value
               var rulesJsonObject = angular.fromJson(value)
               var currentRules = rulesJsonObject.rules
               console.log("delete rule item start:", item)
               var newRules = new Array()
               var index = 0;
-              for(var r in currentRules) {
+              for (var r in currentRules) {
                 console.log("r rule:", r)
-                if(currentRules[r].rule_name == item.rule_name && currentRules[r].type == item.type 
-                  && currentRules[r].upstream_name == item.upstream_name){
-                    console.log("delete rule item:", item)
-                    //delete currentRules[r]
-                    continue;
-                  }
-                  newRules[index] = currentRules[r];
-                  index++;
+                if (currentRules[r].rule_name == item.rule_name && currentRules[r].type == item.type
+                  && currentRules[r].upstream_name == item.upstream_name) {
+                  console.log("delete rule item:", item)
+                  //delete currentRules[r]
+                  continue;
+                }
+                newRules[index] = currentRules[r];
+                index++;
               }
 
               console.log("currentRules:", currentRules)
-              if(!currentRules && currentRules !== 0 && currentRules !== '') {
+              if (!currentRules && currentRules !== 0 && currentRules !== '') {
                 rulesJsonObject.rules = [];
-              }else {
+              } else {
                 rulesJsonObject.rules = newRules;
               }
               console.log("rulesJsonObject:", rulesJsonObject)
               var newValue = angular.toJson(rulesJsonObject)
-              $scope.selector.value = newValue 
+              $scope.selector.value = newValue
 
-              SelectorService.update($scope.selector).then(function(res) {
+              SelectorService.update($scope.selector).then(function (res) {
                 console.log("delete rule:", res)
                 fetchRules();
               })
-
-   /*            RoutesService.delete(route)
-                .then(function (resp) {
-                  $scope.routes.data.splice($scope.routes.data.indexOf(route), 1);
-                }).catch(function (err) {
-                $log.error(err)
-              }) */
             }, function decline() {
             })
         }
@@ -206,5 +192,5 @@
 
       }
     ])
-  ;
+    ;
 }());
