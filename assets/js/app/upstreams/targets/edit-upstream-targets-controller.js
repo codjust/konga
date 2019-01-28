@@ -20,6 +20,7 @@
 
         // Add default list configuration variable to current scope
         $scope = angular.extend($scope, angular.copy(ListConfig.getConfig('target', Target)));
+        $scope.setHealth = setHealth;
 
         // Set initial data
         $scope.loading = false
@@ -137,6 +138,7 @@
 
               $http.delete('kong/upstreams/' + $stateParams.id + '/targets/' + item.id)
                 .then(function (deleted) {
+                  console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!", deleted);
                   _fetchData()
                 }).catch(function (err) {
 
@@ -146,35 +148,43 @@
         }
 
         function _fetchData() {
-          var config = ListConfig.getConfig();
-
-          var parameters = {
-            size: config.itemsFetchSize
-          };
-
-          Target.load(_.merge({}, parameters)).then(function (response) {
+          Target.load().then(function (response) {
             $scope.items = JSON.stringify(response.data) === "{}" ? [] : response.data;
 
+            // Get Targets health
             if($rootScope.compareKongVersion('0.12.2') >= 0) {
               // Fetch targets Health
-              Upstream.health($stateParams.id).then(function (response) {
-                if(response && response.data.length) {
+              Upstream.health($stateParams.id).then(function (_response) {
+                console.log("Health checks =>", response);
+                if(_response && _response.data.length) {
                   $scope.items.forEach(function(item){
-                    var healthObj = _.find(response.data, function (target) {
+                    var healthObj = _.find(_response.data, function (target) {
                       return target.id === item.id;
                     });
-                    item.health = healthObj && healthObj.health ? healthObj.health : "";
+                    if(healthObj && healthObj.health) {
+                      item.health = healthObj.health;
+                    }
                   });
                 }
               });
-
             }
           });
         }
 
+        function setHealth(index, target, healthy) {
+          console.log("@@@@@@@@@@@@@@@@@@@@@@@@@");
+          $http.post(`kong/upstreams/${$stateParams.id}/targets/${target.id}/${healthy ? 'healthy' : 'unhealthy'}`)
+            .then(res => {
+              MessageService.success(`Target ${target.target} is set to ${healthy ? 'healthy' : 'unhealthy'}`);
+              target.health = healthy ? 'HEALTHY' : 'UNHEALTHY';
+            })
+            .catch(err => {
+              console.error(err);
+              MessageService.error('Something went wrong...');
+            })
+        }
 
-        _fetchData()
-
+        _fetchData();
       }
     ])
   ;

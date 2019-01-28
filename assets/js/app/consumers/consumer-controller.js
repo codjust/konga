@@ -31,26 +31,21 @@
             name: 'Credentials',
             icon: 'mdi-security'
           },
-          {
-            id: 'apis',
-            name: 'Accessible APIs',
-            icon: 'mdi-cloud-outline'
-          },
+          // {
+          //   id: 'apis',
+          //   name: 'Accessible APIs',
+          //   icon: 'mdi-cloud-outline'
+          // },
           {
             id: 'services',
-            name: 'Accessible Services',
-            icon: 'mdi-cloud-outline'
-          },
-          {
-            id: 'routes',
             name: 'Accessible Routes',
-            icon: 'mdi-directions-fork'
-          },
+            icon: 'mdi-cloud-outline'
+          }
         ]
 
         if(!_.get($rootScope, 'Gateway.plugins.available_on_server.acl')) {
           $scope.sections = _.filter($scope.sections, function (item) {
-            return item.id !== 'groups' && item.id !== 'apis' && item.id !== 'services' & item.id !== 'routes'
+            return item.id !== 'groups' && item.id !== 'apis' && item.id !== 'services' && item.id !== 'routes'
           })
         }
 
@@ -64,8 +59,8 @@
 
         $scope.showPluginsSection = Semver.cmp($rootScope.Gateway.version, "0.11.0") >= 0;
 
-        $scope.onTabsSelected = function (index) {
-          $scope.activeSection = index;
+        $scope.onTabsSelected = function (sectionId) {
+          $scope.activeSection = sectionId;
         }
 
 

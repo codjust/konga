@@ -37,7 +37,7 @@
     <tr
             dir-paginate="item in plugins.data | orderBy:'created_at':true | itemsPerPage: 25 | filter : search">
         <td>
-            <img ng-src="images/kong/plugins/{{item.name}}.png" style="height: 42px">
+            <img ng-src="images/kong/plugins/{{item.name}}.png" onerror="this.src='images/kong/plugins/kong.svg'" style="height: 42px">
         </td>
         <td>
             <i class="mdi mdi-toggle-switch text-success"
@@ -64,7 +64,7 @@
             <a data-ng-if="item.consumer_id" data-ui-sref="consumers.edit({id:item.consumer_id})">{{item.consumer_id}}</a>
             <span data-ng-if="!item.consumer_id" >All consumers</span>
         </td>
-        <td>{{item.created_at | date : format : timezone}}</td>
+        <td>{{item.created_at*1000 | date : format : timezone}}</td>
 
         <td ng-if="user.hasPermission('plugins','delete')">
             <button class="btn btn-link btn-danger" ng-click="deletePlugin(item)">

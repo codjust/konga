@@ -8,9 +8,9 @@
 
   angular.module('frontend.consumers')
     .controller('ConsumerServicesController', [
-      '_', '$scope', '$q','$stateParams', '$log', '$state', '$uibModal', 'DialogService',
+      '_', '$scope', '$q','$stateParams', '$log', '$state', '$uibModal', 'DialogService', 'MessageService',
       'ConsumerService', 'ApiModel', 'ListConfig', 'UserService', 'PluginsService','ServiceModel',
-      function controller(_, $scope,$q, $stateParams, $log, $state, $uibModal, DialogService,
+      function controller(_, $scope,$q, $stateParams, $log, $state, $uibModal, DialogService, MessageService,
                           ConsumerService, ApiModel, ListConfig, UserService, PluginsService,ServiceModel) {
 
 
@@ -25,8 +25,6 @@
         $scope.isAccessControlled = isAccessControlled;
         $scope.needsAuth = needsAuth;
         $scope.isOpen = isOpen;
-
-
 
 
         function isOpen(api) {
@@ -49,7 +47,7 @@
 
         function getGeneralPlugins(api) {
 
-          return _.filter(api.plugins.data,function(item){
+          return _.filter(api.plugins,function(item){
             return !item.consumer_id;
           });
         }
@@ -57,14 +55,14 @@
 
         function getConsumerPlugins(api) {
 
-          return _.filter(api.plugins.data,function(item){
+          return _.filter(api.plugins,function(item){
             return item.consumer_id && item.consumer_id === $stateParams.id;
           });
         }
 
 
-        function onAddPlugin(service) {
-          var modalInstance = $uibModal.open({
+        function onAddPlugin(data, context) {
+          let modalInstance = $uibModal.open({
             animation: true,
             ariaLabelledBy: 'modal-title',
             ariaDescribedBy: 'modal-body',
@@ -79,8 +77,8 @@
                     data: $scope.consumer
                   },
                   {
-                    name: "service",
-                    data: service
+                    name: context || "service",
+                    data: data
                   },
                 ]
               },
@@ -162,9 +160,39 @@
               $scope.items = res.data;
               $scope.loading = false;
               console.log("LOADED CONSUMER SERVICES =>", $scope.items)
-            });
+              // _fetchRoutes();
+
+            }).catch(err => {
+            $scope.loading = false;
+            MessageService.error(`Something went wrong...`)
+          });
 
         }
+
+        // function _fetchRoutes() {
+        //   $scope.loadingRoutes = true;
+        //   ConsumerService.listRoutes($stateParams.id)
+        //     .then(function(res){
+        //       $scope.routes = res.data;
+        //       console.log("LOADED CONSUMER ROUTES =>", $scope.items)
+        //       $scope.items.data.forEach(service => {
+        //         let routes = _.filter($scope.routes.data, route => {
+        //           return route.service.id === service.id;
+        //         })
+        //
+        //         if(routes) {
+        //           service.routes = routes;
+        //         }
+        //       })
+        //       $scope.loading = false;
+        //       $scope.loadingRoutes = false;
+        //     }).catch(err => {
+        //     $scope.loading = false;
+        //     $scope.loadingRoutes = false;
+        //     MessageService.error(`Something went wrong...`)
+        //   });
+        //
+        // }
 
 
         _fetchData();

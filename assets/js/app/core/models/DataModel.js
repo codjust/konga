@@ -20,9 +20,10 @@
          * Constructor for actual data model.
          *
          * @param   {string}  [endpoint]  Name of the API endpoint
+         * @param   {boolean}  [noPrefix]  Don't use the the /api prefix
          * @constructor
          */
-        var DataModel = function(endpoint,dontAppend) {
+        var DataModel = function(endpoint,noPrefix) {
           // Initialize default values.
           this.object = {};
           this.objects = [];
@@ -46,7 +47,7 @@
 
           // Subscribe to specified endpoint
           if (endpoint) {
-            this.endpoint = dontAppend ?  endpoint : 'api/' + endpoint;
+            this.endpoint = noPrefix ?  endpoint : 'api/' + endpoint;
 
             this._subscribe();
           } else {
@@ -298,9 +299,7 @@
               },
               function onError(error) {
                 $log.error('DataModel.load() failed.', error, self.endpoint, parameters);
-                if(error.data && error.data.body && error.data.body.message) {
-                  MessageService.error(error.data.body.message)
-                }
+                MessageService.error(_.get(error, 'data.body.message', 'An unexpected error has occurred...'))
               }
             )
           ;

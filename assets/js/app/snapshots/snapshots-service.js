@@ -17,7 +17,18 @@
                             node_id : node_id
                         });
                     },
+                    snapshot : function(name,node_id) {
+                        return $http.post('api/snapshots/snapshot',{
+                            name : name,
+                            node_id : node_id
+                        });
+                    },
                     restoreSnapshot : function(id,imports) {
+                        return $http.post('api/snapshots/' + id + '/restore',{
+                            imports : imports
+                        });
+                    },
+                    restore : function(id,imports) {
                         return $http.post('api/snapshots/' + id + '/restore',{
                             imports : imports
                         });

@@ -80,7 +80,7 @@ var self = module.exports = {
         });
       },
       afterList: function(req, resBody, next) {
-        if(!sails.models.kongservices) return next(null, resBody);
+        if(!sails.models.kongservices || !req.connection) return next(null, resBody);
         var connectionId = req.connection.id;
 
         sails.models.kongservices.find({
@@ -101,7 +101,7 @@ var self = module.exports = {
         });
       },
       afterFetch: function(req, data, next) {
-        if(!sails.models.kongservices) return next(null, data);
+        if(!sails.models.kongservices || !req.connection) return next(null, data);
         var connectionId = req.connection.id;
         var entityId = req.path.split("/").filter(function (e) {
           return e;
@@ -124,7 +124,7 @@ var self = module.exports = {
         });
       },
       afterCreate: function(req, data, konga_extras, next) {
-        if(!sails.models.kongservices) return next(null, data);
+        if(!sails.models.kongservices || !req.connection) return next(null, data);
         var connectionId = req.connection.id;
         var entityId = data.id;
 
@@ -143,7 +143,7 @@ var self = module.exports = {
         });
       },
       afterDelete: function(req, next) {
-        if(!sails.models.kongservices) return next();
+        if(!sails.models.kongservices || !req.connection) return next();
         var connectionId = req.connection.id;
         // The path must be of type /kong/<entityName>/<entityId>
         var entityId = req.path.replace("/kong","").split("/").filter(function (e) {
@@ -165,7 +165,7 @@ var self = module.exports = {
     },
     apis: {
       afterDelete: function(req, next) {
-
+        if(!req.connection) return next();
         // The path must be of type /kong/<entityName>/<entityId>
         var entityId = req.path.replace("/kong","").split("/").filter(function (e) {
           return e;
@@ -175,9 +175,74 @@ var self = module.exports = {
           api_id: entityId
         }).exec(function (err) {
           if(err) {
-            sails.log("Failed to delete healthcecks of API " + apiId);
+            sails.log("Failed to delete healthcecks of API " + entityId);
             return next(err);
           }
+
+          return next();
+        });
+      },
+    },
+    upstreams: {
+      afterList: function(req, resBody, next) {
+        if(!req.connection) return next(null, resBody);
+
+        const existingUpstreamIds = _.map(resBody.data, item => item.id);
+        sails.log("KongProxyHooks:upstreams:afterList:existingUpstreamIds", existingUpstreamIds);
+
+        if(!existingUpstreamIds.length) {
+          return next();
+        }
+
+        // Check if there are any alerts that do not match
+        // the exiting upstream ids
+        sails.models.upstreamalert.find({
+          upstream_id : {
+            '!' : existingUpstreamIds
+          }
+        }).exec((err, orphans) => {
+          if(err) {
+            sails.log.error("KongProxyHooks:upstreams:afterList:Failed to find orphaned upstreams", err);
+            return next(err);
+          }
+
+          // Delete all orphaned alerts if any
+          const orphanIds = _.map(orphans, item => item.id);
+          if(!orphanIds.length) return next(null, resBody);
+
+          sails.log("KongProxyHooks:upstreams:afterList:orphanIds", orphanIds);
+
+          sails.models.upstreamalert.destroy({
+            id: orphanIds
+          }).exec(function (err) {
+            if(err) {
+              return next(err);
+            }
+
+            sails.log("KongProxyHooks:upstreams:afterList:Deleted alerts of upstreams", orphanIds);
+
+            return next();
+          });
+        });
+
+
+      },
+      afterDelete: function(req, next) {
+        if(!req.connection) return next();
+        // The path must be of type /kong/<entityName>/<entityId>
+        var entityId = req.path.replace("/kong","").split("/").filter(function (e) {
+          return e;
+        })[1];
+
+        sails.models.upstreamalert.destroy({
+          upstream_id: entityId
+        }).exec(function (err) {
+          if(err) {
+            sails.log("KongProxyHooks:upstreams:afterDelete:Failed to delete alerts of upstream " + entityId);
+            return next(err);
+          }
+
+          sails.log("KongProxyHooks:upstreams:afterDelete:Deleted alerts of upstream " + entityId);
 
           return next();
         });

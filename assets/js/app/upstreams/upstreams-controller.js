@@ -10,11 +10,11 @@
         .controller('UpstreamsController', [
             '_','$scope', '$rootScope','$q','$log','UserModel',
             'SocketHelperService','UserService','SettingsService','MessageService',
-            '$state','$uibModal','DialogService','Upstream','$localStorage',
+            '$state','$uibModal','DialogService','Upstream','$localStorage', 'DataModel',
             'ListConfig',
             function controller(_,$scope, $rootScope,$q,$log,UserModel,
                                 SocketHelperService, UserService,SettingsService, MessageService,
-                                $state, $uibModal,DialogService,Upstream,$localStorage,
+                                $state, $uibModal,DialogService,Upstream,$localStorage, DataModel,
                                 ListConfig ) {
 
 
@@ -22,6 +22,8 @@
                 $scope = angular.extend($scope, angular.copy(ListConfig.getConfig('upstream',Upstream)));
                 $scope.user = UserService.user();
 
+                const Alert = new DataModel('api/upstreamalert', true);
+                $scope.alertsCount = 0;
 
                 $scope.openCreateItemModal = function() {
 
@@ -36,6 +38,23 @@
                     });
                 };
 
+                $scope.openAlertsListModal = () => {
+                    $uibModal.open({
+                        animation: true,
+                        ariaLabelledBy: 'modal-title',
+                        ariaDescribedBy: 'modal-body',
+                        templateUrl: 'js/app/upstreams/alerts/alerts-modal.html?v=' + $rootScope.konga_version,
+                        controller: 'AlertsModalController',
+                        controllerAs: '$ctrl',
+                        size: 'lg',
+                        resolve: {
+                            _upstreams: function () {
+                                return _.get($scope, 'items.data', []);
+                            }
+                        }
+                    });
+                }
+
 
                 function _fetchData(){
                     $scope.loading  = true;
@@ -48,12 +67,19 @@
                     });
                 }
 
+                function countAlerts() {
+                    Alert.count({
+                        connection : _.get($scope, 'user.node.id')
+                    }).then(data => {
+                        $scope.alertsCount = data.count;
+                    })
+                }
+
 
                 // Listeners
                 $scope.$on('kong.upstream.created',function(ev,data){
                     _fetchData();
                 });
-
 
 
                 $scope.$on('user.node.updated',function(ev,node){
@@ -67,6 +93,8 @@
 
 
                 _fetchData()
+
+                countAlerts();
 
             }
         ])
