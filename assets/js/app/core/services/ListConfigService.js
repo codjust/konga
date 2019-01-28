@@ -17,7 +17,7 @@
         /**
          * List title item configuration.
          */
-        var titleItems = {
+        let titleItems = {
           service: [
             {
               title: 'name',
@@ -51,7 +51,7 @@
           ],
           route: [
             {
-              title: 'id',
+              title: 'name / id',
               column: 'id',
               width: 100,
               searchable: true,
@@ -121,15 +121,17 @@
               sortable: true,
               inSearch: true,
               inTitle: true
-            },
-            // {
-            //     title: 'upstream url',
-            //     column: 'upstream_url',
-            //     searchable: true,
-            //     sortable: true,
-            //     inSearch: true,
-            //     inTitle: true
-            // }
+            }
+          ],
+          consumerACLs: [
+            {
+              title: 'group',
+              column: 'group',
+              searchable: true,
+              sortable: true,
+              inSearch: true,
+              inTitle: true
+            }
           ],
           consumerService: [
             {
@@ -148,6 +150,40 @@
                 sortable: true,
                 inSearch: true,
                 inTitle: true
+            }
+          ],
+          consumerRoute: [
+            {
+              title: 'name',
+              column: 'name',
+              searchable: true,
+              sortable: true,
+              inSearch: true,
+              inTitle: true
+            },
+            {
+              title: 'hosts',
+              column: 'hosts',
+              searchable: true,
+              sortable: true,
+              inSearch: true,
+              inTitle: true
+            },
+            {
+              title: 'service',
+              column: 'service',
+              searchable: true,
+              sortable: true,
+              inSearch: true,
+              inTitle: true
+            },
+            {
+              title: 'paths',
+              column: 'paths',
+              searchable: true,
+              sortable: true,
+              inSearch: true,
+              inTitle: true
             }
           ],
           target: [
@@ -191,6 +227,30 @@
             {
               title: 'slots',
               column: 'slots'
+            },
+            {
+              title: 'created',
+              column: 'created_at',
+              sortable: true,
+            }
+          ],
+          upstreamAlert: [
+            {
+              title: '',
+              column: '',
+              width: 1
+            },
+            {
+              title: 'Upstream',
+              column: 'upstream_id',
+              searchable: true,
+              sortable: true,
+              inSearch: true,
+              inTitle: true
+            },
+            {
+              title: 'Connection',
+              column: 'connection'
             },
             {
               title: 'created',
@@ -598,12 +658,15 @@
           ],
         };
 
+        let defaultLimit = 1000;
+
         return {
+          defaultLimit: defaultLimit,
           getConfig: function getConfig(property, model) {
             return {
               itemCount: 0,
               items: [],
-              itemsFetchSize: 4294967295,
+              itemsFetchSize: defaultLimit,
               itemsPerPage: 25,
               titleItems: this.getTitleItems(property),
               itemsPerPageOptions: [10, 25, 50, 100],

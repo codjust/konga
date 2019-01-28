@@ -98,6 +98,7 @@ module.exports.routes = {
 
   // Snapshots
   'POST /api/snapshots/take': 'SnapshotController.takeSnapShot',
+  'POST /api/snapshots/snapshot': 'SnapshotController.snapshot',
   'GET /api/snapshots/subscribe': 'SnapshotController.subscribe',
   'POST /api/snapshots/:id/restore': 'SnapshotController.restore',
   'GET /api/snapshots/:id/download': 'SnapshotController.download',
@@ -133,11 +134,20 @@ module.exports.routes = {
 
 
   /**
+   * Fix Kong 1.x Listing routes
+   */
+
+  'GET /kong/:entity': 'KongProxyController.listProxy',
+  'GET /kong/:entity/:id': 'KongProxyController.proxy',
+  'GET /kong/:entity/:id/:child_entity': 'KongProxyController.listProxy',
+
+
+  /**
    * Fallback to proxy
    */
 
   'GET /kong': 'KongProxyController.proxy',
-  'GET /kong/*': 'KongProxyController.proxy',
+  'GET /kong/*': 'KongProxyController.listProxy',
   'POST /kong/*': 'KongProxyController.proxy',
   'PUT /kong/*': 'KongProxyController.proxy',
   'PATCH /kong/*': 'KongProxyController.proxy',

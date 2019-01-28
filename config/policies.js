@@ -75,7 +75,7 @@ module.exports.policies = {
     'findOne': ['authenticated'],
     'create': ['authenticated', 'isAdmin', 'addDataCreate', 'createUser'],
     'update': ['authenticated', 'addDataUpdate', 'updateUser'],
-    'destroy': ['authenticated', 'isAdmin'],
+    'destroy': ['authenticated', 'isAdmin', 'deleteUser'],
     'add': ['authenticated', 'isAdmin'],
     'remove': ['authenticated', 'isAdmin']
   },
@@ -135,12 +135,20 @@ module.exports.policies = {
   SnapshotController: {
     '*': ['authenticated'],
     'takeSnapShot': ['authenticated', 'isAdmin', 'dynamicNode', 'createUser'],
+    'snapshot': ['authenticated', 'isAdmin', 'dynamicNode', 'createUser'],
     'restore': ['authenticated', 'isAdmin', 'dynamicNode'],
     'remove': ['authenticated', 'isAdmin'],
     'find': ['authenticated', 'isAdmin']
   },
 
   SnapshotScheduleController: {
+    'create': ['authenticated', 'isAdmin', 'addDataCreate'],
+    'update': ['authenticated', 'isAdmin', 'addDataUpdate'],
+    'remove': ['authenticated', 'isAdmin'],
+    'find': ['authenticated', 'isAdmin']
+  },
+
+  UpstreamAlertsController: {
     'create': ['authenticated', 'isAdmin', 'addDataCreate'],
     'update': ['authenticated', 'isAdmin', 'addDataUpdate'],
     'remove': ['authenticated', 'isAdmin'],

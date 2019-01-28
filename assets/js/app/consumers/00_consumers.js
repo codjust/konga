@@ -68,6 +68,10 @@
               'services@consumers.edit': {
                 templateUrl: 'js/app/consumers/services/consumer-services.html',
                 controller: 'ConsumerServicesController'
+              },
+              'routes@consumers.edit': {
+                templateUrl: 'js/app/consumers/routes/consumer-routes.html',
+                controller: 'ConsumerRoutesController'
               }
             },
             resolve: {
@@ -76,6 +80,20 @@
                 '$stateParams',
                 function (ConsumerService, $stateParams) {
                   return ConsumerService.findById($stateParams.id)
+                }
+              ],
+              _gateway: [
+                'InfoService',
+                '$rootScope',
+                function (InfoService, $rootScope) {
+                  return new Promise((resolve, reject) => {
+                    var watcher = $rootScope.$watch('Gateway', function (newValue, oldValue) {
+                      if (newValue) {
+                        watcher(); // clear watcher
+                        resolve(newValue)
+                      }
+                    })
+                  })
                 }
               ],
               _activeNode: [

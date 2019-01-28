@@ -29,9 +29,9 @@
                 controller: 'RoutesController',
                 resolve:{
                   _services: [
-                    'ServiceModel', function resolve(ServiceModel) {
+                    'ServiceModel', 'ListConfig', function resolve(ServiceModel, ListConfig) {
                       return ServiceModel.load({
-                        size : 4294967295
+                        size : ListConfig.defaultLimit
                       })
                     }
                   ]
@@ -56,6 +56,20 @@
                     'RoutesService', '$stateParams',
                     function resolve(RoutesService, $stateParams) {
                       return RoutesService.findById($stateParams.route_id)
+                    }
+                  ],
+                  _gateway: [
+                    'InfoService',
+                    '$rootScope',
+                    function (InfoService, $rootScope) {
+                      return new Promise((resolve, reject) => {
+                        var watcher = $rootScope.$watch('Gateway', function (newValue, oldValue) {
+                          if (newValue) {
+                            watcher(); // clear watcher
+                            resolve(newValue)
+                          }
+                        })
+                      })
                     }
                   ],
                   _activeNode: [

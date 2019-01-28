@@ -8,8 +8,8 @@
 
   angular.module('frontend.consumers')
     .controller('ConsumerPluginsController', [
-      '_', '$scope', '$stateParams', '$log', '$state', '$uibModal', 'ConsumerService', 'PluginsService', 'MessageService', 'DialogService',
-      function controller(_, $scope, $stateParams, $log, $state, $uibModal, ConsumerService, PluginsService, MessageService, DialogService) {
+      '_', '$scope', '$stateParams', '$log', '$state', '$http', 'BackendConfig', '$uibModal', 'ConsumerService', 'PluginsService', 'MessageService', 'DialogService',
+      function controller(_, $scope, $stateParams, $log, $state, $http, BackendConfig, $uibModal, ConsumerService, PluginsService, MessageService, DialogService) {
 
 
         $scope.onAddPlugin = onAddPlugin;
@@ -18,6 +18,7 @@
         $scope.updatePlugin = updatePlugin;
         $scope.togglePlugin = togglePlugin;
         $scope.getContext   = getContext;
+        $scope.loadEntity  = loadEntity;
         $scope.search = '';
 
 
@@ -30,6 +31,17 @@
         function togglePlugin(plugin) {
           plugin.enabled = !plugin.enabled;
           updatePlugin(plugin);
+        }
+
+        function loadEntity(item, entity, id) {
+          item.loading = true;
+          $http.get(BackendConfig.url + `kong/${entity}s/${id}`)
+            .then(result => {
+              // item.loading = false;
+              item[entity] = result.data;
+            }).catch(err => {
+            item.loading = false;
+          })
         }
 
         function onAddPlugin() {
@@ -67,11 +79,11 @@
         }
 
         function getContext(plugin) {
-          if(plugin.service_id) {
+          if(plugin.service) {
             return 'services'
-          } else if(plugin.route_id) {
+          } else if(plugin.route) {
             return 'routes'
-          } else if(plugin.api_id) {
+          } else if(plugin.api) {
             return 'apis'
           }else{
             return 'global'
@@ -91,7 +103,6 @@
             $log.error("updatePlugin", err);
           });
         }
-
 
         function deletePlugin(plugin) {
           DialogService.prompt(
@@ -126,7 +137,6 @@
             }
           });
         }
-
 
         function fetchPlugins() {
           ConsumerService.listPlugins($stateParams.id)

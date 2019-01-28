@@ -29,7 +29,20 @@
         //var pluginOptions = new KongPluginsService().pluginOptions()
         var options = new KongPluginsService().pluginOptions(_pluginName)
 
-        $scope.schema = _schema.data
+
+        var sch = _schema.data;
+        $scope.schema = {
+          fields: {}
+        };
+
+        if(_.isArray(sch.fields)) {
+          sch.fields.forEach(item => {
+            $scope.schema.fields[Object.keys(item)[0]] = item[Object.keys(item)[0]];
+          })
+        }
+
+
+        // $scope.schema = _schema.data
         $scope.pluginName = _pluginName
         console.log("Schema", $scope.schema)
         //$log.debug("Options", options)
@@ -47,7 +60,6 @@
         function initialize() {
           // Initialize plugin fields data
           $scope.data = _.merge(options.fields, $scope.schema)
-
 
           // Define general modal window content
           $scope.description = $scope.data.meta ? $scope.data.meta.description
@@ -95,26 +107,38 @@
 
           // Add api_id to request_data if defined
           if ($scope.api) {
-            request_data.api_id = $scope.api.id;
+            request_data.api = {
+              id: $scope.api.id
+            };
           }
 
           // Add service_id to request_data if defined
           if ($scope.service) {
-            request_data.service_id = $scope.service.id;
+            request_data.service = {
+              id: $scope.service.id
+            };
           }
 
           // Add route_id to request_data if defined
           if ($scope.route) {
-            request_data.route_id = $scope.route.id;
+            request_data.route = {
+              id: $scope.route.id
+            };
           }
 
-          // If a consumer is defined, add consumer_id to request data
+          // If a consumer is defined, add consumer id to request data
           if ($scope.consumer) {
-            request_data.consumer_id = $scope.consumer.id;
+            request_data.consumer = {
+              id: $scope.consumer.id
+            };
           }
 
-          if ($scope.data.consumer_id) { // Overwrite consumer if explicitly set
-            request_data.consumer_id = $scope.data.consumer_id;
+          // Overwrite consumer if explicitly set
+          const explicitlySetConsumer = _.get($scope, 'data.consumer.id');
+          if (explicitlySetConsumer) {
+            request_data.consumer = {
+              id: explicitlySetConsumer
+            };
           }
 
           // Apply monkey patches to request data if needed
@@ -123,12 +147,20 @@
           // Create request data "config." properties
           var config = PluginHelperService.createConfigProperties(request_data.name,$scope.data.fields)
 
-          request_data = _.merge(request_data, config)
+          request_data = _.merge(request_data, config || {})
 
           // Delete unset fields
           Object.keys(request_data).forEach(function (key) {
             if (!request_data[key]) delete request_data[key]
           })
+
+          // Delete unset config fields
+          if(request_data.config) {
+            Object.keys(request_data.config).forEach(function (key) {
+              if (!request_data.config[key]) delete request_data.config[key]
+            })
+          }
+
 
           console.log("REQUEST DATA =>", request_data)
 
@@ -145,22 +177,24 @@
             }, function (err) {
               $scope.busy = false;
               $log.error("create plugin", err)
-              var errors = {}
 
-              if (err.data.customMessage) {
-                Object.keys(err.data.customMessage).forEach(function (key) {
-                  errors[key.replace('config.', '')] = err.data.customMessage[key]
-                  MessageService.error(key + " : " + err.data.customMessage[key])
-                })
+              $scope.errors = {};
+              const errorBody = _.get(err, 'data.body');
+              if (errorBody) {
+                if (errorBody.fields) {
+
+                  for (let key in errorBody.fields) {
+                    $scope.errors[key] = errorBody.fields[key]
+                  }
+                }
+                $scope.errorMessage = errorBody.message || '';
+              } else {
+                $scope.errorMessage = "An unknown error has occured"
               }
 
-              if (err.data.body) {
-                Object.keys(err.data.body).forEach(function (key) {
-                  errors[key] = err.data.body[key]
-                  MessageService.error(key + " : " + err.data.body[key])
-                })
-              }
-              $scope.errors = errors
+              MessageService.error($scope.errorMessage);
+
+
             }, function evt(event) {
               // Only used for ssl plugin certs upload
               var progressPercentage = parseInt(100.0 * event.loaded / event.total);
@@ -253,6 +287,10 @@
             metrics.splice(index,1);
           }
         };
+
+        $scope.getFieldProp = (field) => {
+          return Object.keys(field)[0];
+        }
       }
     ]);
 }());

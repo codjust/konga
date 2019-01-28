@@ -23,8 +23,11 @@
 
           var modalInstance = $uibModal.open({
             animation: true,
+            backdrop: 'static',
             ariaLabelledBy: 'modal-title',
             ariaDescribedBy: 'modal-body',
+            size: 'lg',
+
             templateUrl: 'js/app/snapshots/views/snapshot-apply-modal.html',
             controller: function ($scope, $uibModalInstance, SnapshotsService, UserService, _snapshot) {
 
@@ -126,12 +129,8 @@
           Snapshot.fetch($stateParams.id)
             .then(function (result) {
 
-              // Delete `data.routes` since the routes are embedded in the `data.services`
-              delete result.data.routes;
-
               $scope.originalSnapshot = result;
               $scope.snapshot = _.cloneDeep(result);
-
 
               // $scope.snapshotCopy = angular.copy(_snapshot)
               // delete $scope.snapshotCopy.data;
@@ -144,15 +143,6 @@
                 })
               }
 
-
-              if ($scope.snapshot.data.apis) {
-
-                // $scope.snapshot.data.apis = $scope.snapshot.data.apis.slice(0,25)
-
-                // $scope.snapshot.data.upstreams.forEach(function(item){
-                //     item.orderlist = '( Not shown for faster DOM rendering... )'
-                // })
-              }
 
               $scope.loading = false;
 

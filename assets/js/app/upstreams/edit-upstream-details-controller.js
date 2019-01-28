@@ -14,11 +14,13 @@
                           $log, $state, Upstream, MessageService) {
 
 
+        $scope.context = 'update';
         $scope.submit = function () {
 
           $scope.busy = true
           var data = angular.copy($scope.upstream);
           fixHealthChecksHttpStatusesType(data);
+          delete data.data; // Kong 1.x related bug
           Upstream.update($scope.upstream.id, data)
             .then(
               function onSuccess(result) {
